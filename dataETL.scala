@@ -112,4 +112,14 @@ def to24Hour(s: String): String =
 
 val time_count2 = time_count.map(tuple => Tuple3(tuple._1.substring(0,2) + tuple._1.charAt(4), tuple._1.substring(2,4), tuple._2)).filter(tuple => !tuple._1.equals("") && !tuple._2.equals("")).map(tuple => to24Hour(tuple._1) + "," + tuple._2 + "," + tuple._3)
 
+val data3 = sc.textFile("parking/2015.csv")
+
+val date2 = data3.map(line => line.split(",")(4)).filter(!_.equals("")).filter(!_.equals("Issue Date"))
+
+val month2 = date2.map(_.split("/")(0)).filter(isAllDigits(_)).filter(_.length == 2).map(line => (line, 1)).reduceByKey(_ + _).sortBy(_._2, false).map(tuple => tuple._1 + "," + tuple._2)
+
+val uberData = sc.textFile("parking/uber-raw-data-janjune-15.csv")
+val dateTime = uberData.map(line => line.split(",")(1)).filter(!_.equals("Pickup_date")).filter(!_.equals(""))
+val uberMonth = dateTime.map(_.split(" ")(0).split("-")(1)).map(line => (line, 1)).reduceByKey(_ + _).sortBy(_._2, false).map(tuple => tuple._1 + "," + tuple._2)
+val uberTime = dateTime.map(_.split(" ")(1)).map(line => (line.split(":")(0)+ line.split(":")(1))).map(line => (line, 1)).reduceByKey(_ + _).sortBy(_._2, false).map(tuple => tuple._1.substring(0,2) + "," + tuple._1.substring(2, 4) + "," + tuple._2)
 
